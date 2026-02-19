@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>메인페이지</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .wrap { width: 520px; margin: 0 auto; }
+        .box { margin-top: 16px; padding: 16px; border: 1px solid #ddd; }
+        a { margin-right: 12px; }
+        button { height: 34px; padding: 0 12px; cursor: pointer; }
+        .welcome { margin: 0 0 12px 0; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h2>메인페이지</h2>
+
+    <div class="box">
+        <!--  로그인 상태 -->
+        <div th:if="${loginUserId != null}">
+            <p class="welcome">
+                <b th:text="${loginUserId}"></b>님 환영합니다!
+            </p>
+
+            <button type="button" onclick="logout()">로그아웃</button>
+            <a href="/boards/new">글 작성</a>
+            <a th:href="@{/boards/list}">글 목록</a>
+        </div>
+
+        <!--  비로그인 상태 -->
+        <div th:if="${loginUserId == null}">
+            <p>
+                <a th:href="@{/users/signup}">회원가입</a>
+                <a th:href="@{/users/login}">로그인</a>
+                <a th:href="@{/boards/list}">글 목록</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function logout() {
+        try {
+            const res = await fetch("/users/logout", { method: "POST" });
+            // 로그아웃 성공/실패 상관없이 홈 새로고침
+            location.href = "/";
+        } catch (e) {
+            alert("로그아웃 중 오류가 발생했습니다.");
+        }
+    }
+</script>
+</body>
+</html>

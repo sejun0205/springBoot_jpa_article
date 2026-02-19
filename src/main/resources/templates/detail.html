@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>게시글 상세</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .wrap { width: 820px; margin: 0 auto; }
+    .btn { display:inline-block; padding: 8px 12px; border: 1px solid #222; color:#222; text-decoration:none; margin-right:8px; }
+    .btn:hover { background:#222; color:#fff; }
+    .box { border:1px solid #ddd; padding:16px; margin-top:14px; }
+    pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; margin-top: 14px; }
+    .actions { margin-top: 14px; }
+    .msg { margin-top: 10px; min-height: 18px; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>게시글 상세</h2>
+
+  <div>
+    <a class="btn" th:href="@{/boards/list}">목록</a>
+    <a class="btn" th:href="@{/}">홈</a>
+  </div>
+
+  <div class="box">
+    <h3 th:text="${board.boardTitle}">제목</h3>
+
+    <p>
+      번호: <b th:text="${board.boardBno}">1</b>
+      &nbsp;|&nbsp;
+      작성일: <b th:text="${board.createdAt}">날짜</b>
+    </p>
+
+    <pre th:text="${board.boardContent}">내용</pre>
+  </div>
+
+  <!--  JS에서 boardBno 사용 -->
+  <input type="hidden" id="bno" th:value="${board.boardBno}">
+
+  <!--  본인 글일 때만 수정/삭제 보이기 -->
+  <div class="actions" th:if="${isOwner}">
+    <a class="btn" href="#" onclick="goEdit(); return false;">수정</a>
+    <a class="btn" href="#" onclick="deletePost(); return false;">삭제</a>
+  </div>
+
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+  const msgEl = document.getElementById("msg");
+
+  function show(message, ok) {
+    msgEl.textContent = message || "";
+    msgEl.style.color = ok ? "green" : "red";
+  }
+
+  function getBno() {
+    return document.getElementById("bno").value;
+  }
+
+  function goEdit() {
+    const bno = getBno();
+    location.href = "/boards/" + bno + "/edit";
+  }
+
+  async function deletePost() {
+    const bno = getBno();
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await fetch("/boards/" + bno, { method: "DELETE" });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        show(data.message || "삭제 완료", true);
+        alert("삭제 완료");
+        location.href = "/boards/list";
+      } else {
+        show(data.message || "삭제 실패", false);
+      }
+    } catch (e) {
+      show("요청 중 오류가 발생했습니다.", false);
+    }
+  }
+</script>
+</body>
+</html>

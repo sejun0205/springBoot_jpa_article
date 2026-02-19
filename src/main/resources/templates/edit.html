@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>게시글 수정</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .wrap { width: 820px; margin: 0 auto; }
+    input, textarea { width: 100%; box-sizing: border-box; padding: 10px; }
+    textarea { height: 260px; resize: vertical; }
+    .row { margin-bottom: 12px; }
+    .btn { display:inline-block; padding: 8px 12px; border: 1px solid #222; background:#fff; cursor:pointer; }
+    .btn:hover { background:#222; color:#fff; }
+    .msg { margin-top: 10px; min-height: 18px; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>게시글 수정</h2>
+
+  <!-- boardBno를 JS에서 쓰기 위해 hidden -->
+  <input type="hidden" id="boardBno" th:value="${board.boardBno}">
+
+  <div class="row">
+    <input id="title" placeholder="제목" th:value="${board.boardTitle}">
+  </div>
+
+  <div class="row">
+    <textarea id="content" placeholder="내용" th:text="${board.boardContent}"></textarea>
+  </div>
+
+  <button class="btn" type="button" onclick="updatePost()">수정</button>
+  <button class="btn" type="button" onclick="goDetail()">취소</button>
+
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+  const boardBnoEl = document.getElementById("boardBno");
+  const titleEl = document.getElementById("title");
+  const contentEl = document.getElementById("content");
+  const msgEl = document.getElementById("msg");
+
+  function show(message, ok) {
+    msgEl.textContent = message || "";
+    msgEl.style.color = ok ? "green" : "red";
+  }
+
+  function goDetail() {
+    const boardBno = boardBnoEl.value;
+    location.href = "/boards/" + boardBno;
+  }
+
+  async function updatePost() {
+    const boardBno = boardBnoEl.value;
+    const boardTitle = titleEl.value.trim();
+    const boardContent = contentEl.value.trim();
+
+    if (!boardTitle) return show("제목을 입력하세요", false);
+    if (!boardContent) return show("내용을 입력하세요", false);
+
+    try {
+      const res = await fetch("/boards/" + boardBno, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ boardTitle, boardContent })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        show("수정 완료!", true);
+        location.href = "/boards/" + boardBno;
+      } else {
+        show(data.message || "수정 실패", false);
+      }
+    } catch (e) {
+      show("요청 중 오류가 발생했습니다.", false);
+    }
+  }
+</script>
+</body>
+</html>

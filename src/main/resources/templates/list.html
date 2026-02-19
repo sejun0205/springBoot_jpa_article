@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>게시글 목록</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .wrap { width: 820px; margin: 0 auto; }
+    .top { display:flex; justify-content:space-between; align-items:center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { border: 1px solid #ddd; padding: 10px; }
+    th { background: #f7f7f7; }
+    a { text-decoration: none; color: #222; }
+    a:hover { text-decoration: underline; }
+    .btn { display:inline-block; padding: 8px 12px; border: 1px solid #222; color:#222; }
+    .btn:hover { background:#222; color:#fff; text-decoration: none; }
+    .empty { text-align:center; padding: 20px; color:#666; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h2>게시글 목록</h2>
+    <div>
+      <a class="btn" th:href="@{/boards/new}">글쓰기</a>
+      <a class="btn" th:href="@{/}">홈</a>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+    <tr>
+      <th style="width:80px;">번호</th>
+      <th>제목</th>
+      <th style="width:220px;">작성일</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <!-- boards가 null이거나 비어있을 때 -->
+    <tr th:if="${boards == null or #lists.isEmpty(boards)}">
+      <td class="empty" colspan="3">게시글이 없습니다.</td>
+    </tr>
+
+    <!-- 게시글 목록 -->
+    <tr th:each="b : ${boards}">
+      <td th:text="${b.boardBno}">1</td>
+
+      <!-- 제목은 td 안에 링크로 -->
+      <td>
+        <a th:text="${b.boardTitle}"
+           th:href="@{|/boards/${b.boardBno}|}">제목</a>
+      </td>
+
+      <!-- 작성일 -->
+      <td th:text="${b.createdAt}">2026-02-19T23:00</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

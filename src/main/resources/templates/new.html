@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>글쓰기</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .wrap { width: 520px; margin: 0 auto; }
+    input, textarea { width: 100%; box-sizing: border-box; padding: 10px; }
+    textarea { height: 220px; resize: vertical; }
+    button { height: 40px; padding: 0 14px; cursor: pointer; }
+    .row { margin-bottom: 12px; }
+    .msg { margin-top: 10px; min-height: 18px; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>글쓰기</h2>
+
+  <div class="row">
+    <input id="title" placeholder="제목">
+  </div>
+
+  <div class="row">
+    <textarea id="content" placeholder="내용"></textarea>
+  </div>
+
+  <button type="button" onclick="submitPost()">등록</button>
+  <button type="button" onclick="location.href='/'">취소</button>
+
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+  const titleEl = document.getElementById("title");
+  const contentEl = document.getElementById("content");
+  const msgEl = document.getElementById("msg");
+
+  function show(message, ok) {
+    msgEl.textContent = message || "";
+    msgEl.style.color = ok ? "green" : "red";
+  }
+
+  async function submitPost() {
+    const title = titleEl.value.trim();
+    const content = contentEl.value.trim();
+
+    if (!title) return show("제목을 입력해주세요.", false);
+    if (!content) return show("내용을 입력해주세요.", false);
+
+    try {
+      const res = await fetch("/boards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        //  DTO 필드명과 동일하게 보내야 매핑됨
+        body: JSON.stringify({ boardTitle: title, boardContent: content })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        show(data.message || "글 등록 완료!", true);
+        location.href = "/";
+      } else {
+        show(data.message || "등록 실패", false);
+      }
+    } catch (e) {
+      show("요청 중 오류가 발생했습니다.", false);
+    }
+  }
+</script>
+
+</body>
+</html>
